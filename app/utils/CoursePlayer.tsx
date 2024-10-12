@@ -14,7 +14,7 @@ const CoursePlayer: FC<Props> = ({ videoUrl }) => {
 
   useEffect(() => {
     axios
-      .post("http://dasinaq.com/api/v1/getVdoCipherOTP", {
+      .post("https://dasinaq-a3f53c1899ad.herokuapp.com/api/v1/getVdoCipherOTP", {
         videoId: videoUrl,
       })
       .then((res) => {
