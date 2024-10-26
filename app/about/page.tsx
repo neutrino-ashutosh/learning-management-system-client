@@ -16,7 +16,7 @@ const Page = (props: Props) => {
     <div>
       <Heading
         title="About us - DasinAQ"
-        description="DasinAQ is a learning management system for helping aspiring students."
+        description="DasinAQ is a portal for helping aspiring students."
         keywords="programming,mern"
       />
       <Header
