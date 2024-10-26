@@ -1,5 +1,5 @@
 import { useGetCourseDetailsQuery } from "@/redux/features/courses/coursesApi";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Loader from "../Loader/Loader";
 import Heading from "@/app/utils/Heading";
 import Header from "../Header";
@@ -27,6 +27,10 @@ const CourseDetailsPage = ({ id }: Props) => {
   const [stripePromise, setStripePromise] = useState<any>(null);
   const [clientSecret, setClientSecret] = useState("");
 
+  // const stableCreatePaymentIntent = useCallback((amount: number) => {
+  //   createPaymentIntent(amount);
+  // }, [createPaymentIntent]);
+
   useEffect(() => {
     if (config) {
       const publishablekey = config?.publishablekey;
@@ -36,7 +40,7 @@ const CourseDetailsPage = ({ id }: Props) => {
       const amount = Math.round(data.course.price * 100);
       createPaymentIntent(amount);
     }
-  }, [config, data, userData]);
+  }, [config, data, userData, createPaymentIntent]);
 
   useEffect(() => {
     if (paymentIntentData) {

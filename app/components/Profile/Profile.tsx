@@ -42,14 +42,14 @@ const Profile: FC<Props> = ({ user }) => {
 
   useEffect(() => {
     if (data) {
-      const filteredCourses = user.courses
-        .map((userCourse: any) =>
-          data.courses.find((course: any) => course._id === userCourse._id)
-        )
-        .filter((course: any) => course !== undefined);
-      setCourses(filteredCourses);
+        const filteredCourses = user.courses
+            .map((userCourse: any) =>
+                data.courses.find((course: any) => course._id === userCourse._id)
+            )
+            .filter((course: any) => course !== undefined);
+        setCourses(filteredCourses);
     }
-  }, [data]);
+}, [data, user.courses]); // Add user.courses to the dependency array
 
   return (
     <div className="w-[85%] flex mx-auto">

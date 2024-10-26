@@ -9,7 +9,7 @@ import {
 } from "@/redux/features/courses/coursesApi";
 import Image from "next/image";
 import { format } from "timeago.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import {
   AiFillStar,
@@ -23,6 +23,8 @@ import Ratings from "@/app/utils/Ratings";
 import socketIO from "socket.io-client";
 const ENDPOINT = process.env.NEXT_PUBLIC_SOCKET_SERVER_URI || "";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
+
+
 
 type Props = {
   data: any;
@@ -101,76 +103,86 @@ const CourseContentMedia = ({
       });
     }
   };
-
+  
+  // Ensure courseRefetch and refetch are stable using useCallback
+  const stableRefetch = useCallback(() => refetch(), [refetch]);
+  const stableCourseRefetch = useCallback(() => courseRefetch(), [courseRefetch]);
+  
+  // Store socketId in a ref if it doesn't change across renders
+  const socketRef = useRef(socketId);
+  
   useEffect(() => {
-    if (isSuccess) {
-      setQuestion("");
-      refetch();
-      socketId.emit("notification", {
-        title: `New Question Received`,
-        message: `You have a new question in ${data[activeVideo].title}`,
-        userId: user._id,
-      });
-    }
-    if (answerSuccess) {
-      setAnswer("");
-      refetch();
-      if (user.role !== "admin") {
-        socketId.emit("notification", {
-          title: `New Reply Received`,
-          message: `You have a new question in ${data[activeVideo].title}`,
-          userId: user._id,
-        });
+      if (isSuccess) {
+          setQuestion("");
+          stableRefetch();
+          socketRef.current.emit("notification", {
+              title: `New Question Received`,
+              message: `You have a new question in ${data[activeVideo].title}`,
+              userId: user._id,
+          });
       }
-    }
-    if (error) {
-      if ("data" in error) {
-        const errorMessage = error as any;
-        toast.error(errorMessage.data.message);
+  
+      if (answerSuccess) {
+          setAnswer("");
+          stableRefetch();
+          if (user.role !== "admin") {
+              socketRef.current.emit("notification", {
+                  title: `New Reply Received`,
+                  message: `You have a new question in ${data[activeVideo].title}`,
+                  userId: user._id,
+              });
+          }
       }
-    }
-    if (answerError) {
-      if ("data" in answerError) {
-        const errorMessage = error as any;
-        toast.error(errorMessage.data.message);
+  
+      if (error && "data" in error) {
+          toast.error((error as any).data.message);
       }
-    }
-    if (reviewSuccess) {
-      setReview("");
-      setRating(1);
-      courseRefetch();
-      socketId.emit("notification", {
-        title: `New Question Received`,
-        message: `You have a new question in ${data[activeVideo].title}`,
-        userId: user._id,
-      });
-    }
-    if (reviewError) {
-      if ("data" in reviewError) {
-        const errorMessage = error as any;
-        toast.error(errorMessage.data.message);
+  
+      if (answerError && "data" in answerError) {
+          toast.error((answerError as any).data.message);
       }
-    }
-    if (replySuccess) {
-      setReply("");
-      courseRefetch();
-    }
-    if (replyError) {
-      if ("data" in replyError) {
-        const errorMessage = error as any;
-        toast.error(errorMessage.data.message);
+  
+      if (reviewSuccess) {
+          setReview("");
+          setRating(1);
+          stableCourseRefetch();
+          socketRef.current.emit("notification", {
+              title: `New Question Received`,
+              message: `You have a new question in ${data[activeVideo].title}`,
+              userId: user._id,
+          });
       }
-    }
+  
+      if (reviewError && "data" in reviewError) {
+          toast.error((reviewError as any).data.message);
+      }
+  
+      if (replySuccess) {
+          setReply("");
+          stableCourseRefetch();
+      }
+  
+      if (replyError && "data" in replyError) {
+          toast.error((replyError as any).data.message);
+      }
+      
   }, [
-    isSuccess,
-    error,
-    answerSuccess,
-    answerError,
-    reviewSuccess,
-    reviewError,
-    replySuccess,
-    replyError,
+      isSuccess,
+      error,
+      answerSuccess,
+      answerError,
+      reviewSuccess,
+      reviewError,
+      replySuccess,
+      replyError,
+      activeVideo,
+      data,
+      user._id,
+      user.role,
+      stableRefetch,
+      stableCourseRefetch
   ]);
+  
 
   const handleAnswerSubmit = () => {
     addAnswerInQuestion({

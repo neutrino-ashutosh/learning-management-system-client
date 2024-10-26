@@ -4,7 +4,7 @@ import {
   useGetAllNotificationsQuery,
   useUpdateNotificationStatusMutation,
 } from "@/redux/features/notifications/notificationsApi";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useCallback } from "react";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
@@ -30,9 +30,12 @@ const DashboardHeader: FC<Props> = ({ open, setOpen }) => {
       )
   );
 
-  const playNotificationSound = () => {
+  // const playNotificationSound = () => {
+  //   audio.play();
+  // };
+  const playNotificationSound = useCallback(() => {
     audio.play();
-  };
+  }, [audio]);
 
   useEffect(() => {
     if (data) {
@@ -44,14 +47,14 @@ const DashboardHeader: FC<Props> = ({ open, setOpen }) => {
       refetch();
     }
     audio.load();
-  }, [data, isSuccess,audio]);
+  }, [data, isSuccess, refetch, audio]);
 
   useEffect(() => {
     socketId.on("newNotification", (data) => {
       refetch();
       playNotificationSound();
     });
-  }, []);
+  }, [refetch, playNotificationSound]);
 
   const handleNotificationStatusChange = async (id: string) => {
     await updateNotificationStatus(id);
