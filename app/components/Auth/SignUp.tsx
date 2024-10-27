@@ -36,8 +36,8 @@ const Signup: FC<Props> = ({ setRoute }) => {
    }
    if(error){
     if("data" in error){
-      const errorData = error as any;
-      toast.error(errorData.data.message);
+      const errorMessage = (error as any)?.data?.message || "An error occurred";
+      toast.error(errorMessage);
     }
    }
   }, [isSuccess, error, data?.message, setRoute]);
@@ -66,7 +66,7 @@ const Signup: FC<Props> = ({ setRoute }) => {
           </label>
           <input
             type="text"
-            name=""
+            name="name"
             value={values.name}
             onChange={handleChange}
             id="name"
@@ -84,7 +84,7 @@ const Signup: FC<Props> = ({ setRoute }) => {
         </label>
         <input
           type="email"
-          name=""
+          name="email"
           value={values.email}
           onChange={handleChange}
           id="email"
